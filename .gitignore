@@ -1,0 +1,14 @@
+# Keep private experiments, credentials and device artifacts outside publication.
+/private/
+/backups/
+*.img
+*.bin
+*.elf
+*.apk
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+.env
+.env.*
