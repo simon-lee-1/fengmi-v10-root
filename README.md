@@ -2,7 +2,7 @@
 
 A prescriptive engineering guide to the software-only rooting method demonstrated on the **Chinese-market Fengmi V10 M146FCN, FengOS 2.1.5.3936**.
 
-**This guide applies to the Chinese model. It does not cover the international V10.**
+**The confirmed procedure applies to the Chinese model. International V10 compatibility remains untested; see the [portability hypothesis](docs/01-device-and-preparation.md#international-v10-portability-hypothesis).**
 
 The verified result is **Magisk 30.7 root across three consecutive successful normal boots**, with SELinux **Enforcing** and Android reporting verified boot **green** and the bootloader **locked**. The work used network ADB and retained the stock projector software and device trees.
 
@@ -16,7 +16,7 @@ The working chain is:
 4. Give a temporary child private credentials and let it modify and restore its own credentials through observer-created mappings.
 5. Use a dynamically identified init SELinux identity inside that child to obtain verified stock partition backups.
 6. Validate the existing AVB trust chain and construct a correctly wrapped, signed Magisk BOOT image.
-7. Write and verify the complete BOOT partition, restore enforcing mode, and verify actual Magisk root after normal startup.
+7. Temporarily clear the profiled kernel enforcement variable through the Mali mapping, write and verify the complete BOOT partition, restore Enforcing through normal SELinuxfs, and verify actual Magisk root after normal startup.
 
 ```mermaid
 flowchart LR
@@ -41,6 +41,12 @@ flowchart LR
 This is the documented procedure and compatibility profile. The purpose-built Rust helpers, private firmware images and signing material are not distributed in this repository. Recreating the method requires implementing the described guards and deriving the exact profile from the target firmware. A different device using the name `nemo` is a separate target.
 
 Boot-persistent root and the completed Magisk pre-init environment are verified: the final configuration selects `userdata`, its pre-init block device matches that partition, and the official environment check returns 0. Firmware replacement, recovery entry and future Magisk updates are separate qualifications.
+
+## International V10 hypothesis
+
+The same method may transfer to an international V10 if it retains the relevant Mali driver interface, kernel behavior and boot trust chain. Language, launcher and bundled-app changes alone would not remove the kernel mechanism. This is an **untested hypothesis**, with no verified international firmware comparison or successful international root report in the sources reviewed. Temporary root and persistent Magisk require separate checks; [the preparation chapter](docs/01-device-and-preparation.md#international-v10-portability-hypothesis) lists the evidence needed.
+
+For the initial Chinese-model flash, `setenforce 0` did **not** succeed. The working fallback and subsequent normal-interface restoration are explained in [the SELinux section](docs/04-magisk-boot.md#handle-selinux-for-the-initial-installation).
 
 ## Credits and publication scope
 

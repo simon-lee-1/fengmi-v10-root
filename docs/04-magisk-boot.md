@@ -85,11 +85,28 @@ The working bootstrap and completed-preinit images satisfy these format and load
 
 Independently parse the candidate and compare every allowed and preserved field against stock. The bootstrap candidate passed 39 structural, payload, cryptographic and loader checks; the final pre-init candidate passed 56, preserving the earlier conditions and verifying its exact configuration addition.
 
+## Handle SELinux for the initial installation
+
+**`setenforce 0` did not provide the transition.** The temporary helper already had UID 0, the validated capability set and a dynamically selected init SID. Those privileges permitted the qualified backup reads, but opening BOOT read/write was denied while Enforcing. UID 0 does not automatically bypass SELinux policy.
+
+The helper then attempted the normal operation underlying `setenforce 0`: open `/sys/fs/selinux/enforce`, read its current value and write one ASCII `0`. Opening and reading succeeded; the **write** returned `EACCES` (`-13`). The mode remained Enforcing. The successful fallback used the already qualified Mali physical-memory mapping:
+
+1. Identify the exact kernel's `selinux_enforcing` variable from independent references in its enforcement read/write routines, and match the profiled instruction bytes.
+2. Require an aligned four-byte variable containing 1, three identical complete 64-byte surrounding snapshots, and a matching snapshot through the final mapping immediately before the store.
+3. Through the writable Mali-exported mapping, perform one four-byte store **1 → 0**, issue the memory barrier, and verify that the surrounding bytes differ only at that variable.
+4. Unmap and close the export. Independently require `getenforce` to report **Permissive** before the qualified BOOT writer runs.
+
+This was a direct kernel-data change, separate from the private credential edits. It did not patch the enforcement function's code, install a replacement policy or turn a denied `setenforce` command into a successful command. The temporary permissive interval allowed the guarded BOOT write and complete verification below.
+
+**Restore through the normal interface after the flash attempt, before reboot.** From the qualified temporary helper, require `/sys/fs/selinux/enforce` to read `0`, write one ASCII `1`, and read back `1`. This restoration succeeded, and an independent `getenforce` reported Enforcing. Close the file and restore the helper's complete private credential/security snapshots and references as usual.
+
+Do not restore with only a bare memory write of 1. The normal kernel transition also resets the access-vector cache (**AVC**) and updates its status page and netlink notifications. The initial direct store did not perform those normal transition side effects; the restoration deliberately used SELinuxfs so cached permissive decisions and status handling were addressed by the kernel.
+
+The later completed-preinit BOOT update used working Magisk root with SELinux Enforcing. It did not repeat this initial-installation fallback. All three successful root boots were verified with Enforcing enabled.
+
 ## Perform a complete, verified BOOT write
 
-Use the qualified temporary-root helper for the initial installation. Before the first partition write, check the exact fixed BOOT device identity and size and compare **all current BOOT bytes** with the expected stock image. The candidate must already have passed independent validation.
-
-The initial write used a bounded temporary permissive interval. The qualified implementation profiled the exact kernel enforcing word and its surrounding bytes, changed only that word for the interval, and verified the externally observable mode. It subsequently restored Enforcing through the normal SELinuxfs interface, including the kernel's normal enforcement-change handling. Treat this as a distinct global change with an explicit restoration requirement.
+Use the qualified temporary-root helper for the initial installation, during the verified permissive interval above. Before the first partition write, check the exact fixed BOOT device identity and size and compare **all current BOOT bytes** with the expected stock image. The candidate must already have passed independent validation.
 
 Write only the complete validated BOOT image, handle partial I/O, call `fsync`, and compare the **entire** partition readback with the candidate. Keep the known original available for verified rollback on a returned I/O or comparison error. A process-level rollback routine cannot execute during power loss, so a software backup and a tested recovery route remain distinct protections.
 

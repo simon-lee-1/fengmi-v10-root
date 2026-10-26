@@ -47,8 +47,10 @@ Use direct resulting-state evidence at each boundary. A process exit status or a
 
 ## Flash and runtime
 
+- For the initial installation, the exact enforcement profile and stable neighborhood pass before the four-byte transition, and independent `getenforce` reports Permissive.
 - All current BOOT bytes match the expected pre-write image.
 - The complete candidate is written, synchronized and read back identically.
+- After the flash attempt, normal SELinuxfs restoration writes and reads back `1`, runs the kernel's AVC/status transition handling, and independent `getenforce` reports Enforcing before reboot.
 - Private helper identity and global enforcement are restored.
 - Temporary executables and helper processes are absent afterward.
 - Bounded logs contain no new matching kernel panic, Oops, BUG, GPU fault/reset or helper fatal signal.

@@ -29,6 +29,25 @@ e064691a543a294fa196c8a1361e2f5ed1204373081df8a8ed71d14b703a3a68
 
 This profile covers the Chinese model; the international V10 is outside the tested scope. Treat the full profile as the compatibility condition. Re-derive addresses, structure layouts and loader behavior when any relevant component differs. The codename `nemo` also occurs on other Formovie products; retail model and firmware identity matter.
 
+## International V10 portability hypothesis
+
+**Hypothesis, not confirmed support:** an international V10 may support the same approach if it retains the relevant MStar/Mali implementation and boot trust chain. The initial mechanism is the vendor `mem_block_export_dma_buf` physical-memory interface. Changes confined to language, launcher or bundled applications would not by themselves remove that interface. Its accessibility and behavior still depend on the actual driver and policy.
+
+The [manufacturer's Chinese product page](https://formovie.cn/fmjgdsV10), reviewed on 26 October 2026, identifies MT9669, 4 GB RAM and 64 GB storage, and states that **V10 and VX are the same product**. That naming equivalence does not establish international hardware or firmware equivalence. A shared SoC, `nemo` codename or driver version string is insufficient to establish compatibility.
+
+No international V10 driver, kernel or bootloader comparison has been verified for this guide. No successful international V10 root report was identified in the public material reviewed; this is a limit of the available evidence, not a claim that none exists. The evidence supports investigating portability, but not assigning a high probability of success.
+
+| Part of the method | Evidence needed from the international unit |
+|---|---|
+| Device identity | Exact retail model, board revision, build fingerprint, kernel and Android ABI; establish what the seller's “global” designation means |
+| Initial temporary root | Compare the actual `mali_kbase.ko` binary and export implementation; qualify caller access, mapping behavior and the unit's own kernel structures |
+| Initial partition write | Qualify the temporary SELinux transition and normal-interface restoration against that exact kernel and policy |
+| Boot-persistent Magisk | Compare BOOT format, loader behavior, AVB descriptors and the complete accepted public keys in vbmeta and MBOOT |
+
+The Chinese firmware accepts the AOSP AVB RSA-4096 test signing identity described in [the trust-chain chapter](03-backups-and-avb.md). An international build using a different production signing key could still permit temporary root while preventing this demonstrated route to persistent Magisk.
+
+Compare model and firmware properties and the driver hash first. Derive kernel addresses and structure layouts from the target's own evidence, and construct any eventual BOOT candidate from its own validated stock image. The Chinese unit's offsets and patched image are not established as transferable.
+
 ## Establish network ADB and record state privately
 
 Use the projector's authorized ADB connection. Substitute its address locally:
