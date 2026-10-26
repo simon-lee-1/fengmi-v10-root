@@ -54,7 +54,8 @@ Use direct resulting-state evidence at each boundary. A process exit status or a
 - Bounded logs contain no new matching kernel panic, Oops, BUG, GPU fault/reset or helper fatal signal.
 - A new normal boot completes and `su -c id` actually returns UID 0 in the Magisk domain.
 - SELinux reports Enforcing and verified boot reports locked/green.
-- Repeat the normal boot/root check to establish persistence across boot.
+- Repeat the normal boot/root check to establish persistence across boot; the demonstrated chain reached three consecutive successful boots.
+- Verify the final pre-init block device/configuration and require the official Magisk environment check to return 0.
 - Check the projector's physical controls and media functions separately from shell-level assertions.
 
 ## Verified outcome
@@ -67,7 +68,8 @@ Use direct resulting-state evidence at each boundary. A process exit status or a
 | Complete stock backups | Full captures and independent byte-for-byte second reads |
 | Existing AVB chain compatibility | Exact keys, trust callback, hashes and signatures |
 | Signed Magisk BOOT installation | Complete partition write, fsync and full readback |
-| Boot-persistent root | Magisk 30.7 UID 0 verified across two normal boots |
+| Boot-persistent root | Magisk 30.7 UID 0 verified across three consecutive successful normal boots |
+| Completed Magisk environment | Measured `PREINITDEVICE=userdata`, matching pre-init block device, official environment check exit 0 |
 | Security state after successful boot | Enforcing, locked and green |
 
-These are historical verified results on the listed firmware. The publication does not extend that result to other firmware, replacement operating systems, recovery entry, future updates or complete validation of later Magisk pre-init configuration.
+These are confirmed results on the listed Chinese-market M146FCN firmware. The international V10, other firmware, replacement operating systems, recovery entry and future updates remain outside this tested scope.

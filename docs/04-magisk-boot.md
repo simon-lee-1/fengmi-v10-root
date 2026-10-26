@@ -30,7 +30,7 @@ Construct the new ramdisk as **raw newc CPIO** using the official missing-ramdis
 | `.backup` | Directory, 000 |
 | `.backup/.magisk` | Config file, 000 |
 
-The config used for the demonstrated boot-root result contains:
+Use the following bootstrap configuration to establish Magisk root. After the official runtime detector identifies the pre-init partition, add its measured value as described in the completion step below:
 
 ```text
 KEEPVERITY=true
@@ -70,20 +70,20 @@ Preserve:
 - The unchanged external BOOT chain at rollback-index location 1.
 - External vbmeta and vbmeta_a bytes.
 
-The booted image satisfied these exact format and loader bounds:
+The working bootstrap and completed-preinit images satisfy these format and loader bounds:
 
 | Check | Demonstrated value / bound |
 |---|---|
 | Full BOOT partition | 33,554,432 bytes |
-| Raw CPIO | 376,964 bytes |
+| Raw CPIO | Bootstrap: 376,964 bytes; completed pre-init: **376,988 bytes** |
 | Page-rounded initrd span | 378,880 bytes |
 | Parsed Android image span | 16,480,256 bytes, within `0x1900000` |
 | Initrd staging start | `0x24000000` |
-| Initrd end | `0x2405c084`, below `0x24fff800` |
+| Initrd end | Bootstrap: `0x2405c084`; completed pre-init: **`0x2405c09c`**; both below `0x24fff800` |
 | Kernel load/image range | `0x20280000` through `0x2140e000` |
 | Resulting command-line length | Within the 2048-byte loader buffer |
 
-Independently parse the candidate and compare every allowed and preserved field against stock. The demonstrated candidate passed 39 structural, payload, cryptographic and loader checks before its successful runtime test.
+Independently parse the candidate and compare every allowed and preserved field against stock. The bootstrap candidate passed 39 structural, payload, cryptographic and loader checks; the final pre-init candidate passed 56, preserving the earlier conditions and verifying its exact configuration addition.
 
 ## Perform a complete, verified BOOT write
 
@@ -97,7 +97,7 @@ The demonstrated initial write transferred and verified all 32 MiB. It preserved
 
 ## Verify Magisk through actual normal boots
 
-Install the official matching Magisk manager and perform a normal reboot. Confirm a new boot, completed startup, the installed BOOT image identity, and actual superuser execution:
+Install the official matching Magisk manager and start the projector normally. **On this Chinese firmware, `adb reboot` powers the unit off; use the physical power button to start it again.** Confirm a new boot, completed startup, the installed BOOT image identity, and actual superuser execution:
 
 ```sh
 adb -s <PROJECTOR_IP>:5555 shell su -c id
@@ -113,8 +113,32 @@ Enforcing
 30.7:MAGISK:R
 ```
 
-Root was verified across two normal boots, alongside `boot_completed=1`, locked/green state and the expected BOOT content.
+Root was verified across three consecutive successful normal boots spanning bootstrap, official support-file setup and final pre-init completion, alongside `boot_completed=1`, locked/green state and the expected BOOT content for each stage.
 
-The official manager's files-only environment setup populated `/data/adb/magisk` with `busybox`, `magiskboot`, `magiskinit`, `magiskpolicy`, `util_functions.sh` and `boot_patch.sh`. That action schedules a reboot after completion. Use the exact official environment checks to distinguish functioning root from complete environment readiness.
+The official manager's files-only environment setup populated `/data/adb/magisk` with `busybox`, `magiskboot`, `magiskinit`, `magiskpolicy`, `util_functions.sh` and `boot_patch.sh`. That action schedules a reboot after completion; power the projector on again as above. Verify the installed files and repeat the actual root check.
 
-This chapter documents the image configuration that produced the verified root result. Later pre-init configuration changes require their own successful boot and official environment-check result before becoming part of this working recipe. Future Magisk upgrades also require renewed validation of this device's container, loader and signing constraints.
+## Complete and verify the pre-init environment
+
+With Magisk root working and its official support files installed, use the official runtime detector to identify the appropriate pre-init partition. The measured result on this Chinese V10 was `userdata`. Run the detector without `MAGISKTMP` or `MAKEDEV` environment variables when only measuring its selection; those variables enable additional setup actions in the official code.
+
+Rebuild the same proven BOOT image with exactly this one additional line in `.backup/.magisk`:
+
+```text
+PREINITDEVICE=userdata
+```
+
+Preserve the original config bytes, official payloads, entry order and modes, kernel/CRCs, device trees, command-line descriptor, signing identity, salt, rollback fields and external metadata. Recompute the config's CPIO size/padding and the necessary image ID, payload hash and signature. The config grows from 120 to 143 bytes and raw CPIO from 376,964 to 376,988 bytes; its page-rounded and Android-image spans stay unchanged.
+
+From working Magisk root with SELinux Enforcing, require a complete byte comparison against the known-booting bootstrap BOOT before writing the final image. Write and synchronize the complete final partition, then verify all 32 MiB against the validated candidate. Retain the known-booting image for a verified rollback on a returned write/readback error. This update's only intentional payload change is the measured pre-init configuration.
+
+Start the projector again and require all of the following:
+
+- New normal boot and completed Android startup.
+- Actual Magisk UID 0 and version 30.7.
+- Full BOOT identity equal to the validated final image.
+- `/sbin/.magisk/config` contains exactly `PREINITDEVICE=userdata`.
+- `/sbin/.magisk/device/preinit` is an actual block device matching `userdata`: major 179, minor 30 on the tested layout.
+- The official `env_check 30.7 30700`, using `/data/adb/magisk` and `/sbin` as its known paths, returns **exit 0**.
+- SELinux Enforcing, verified boot locked/green, and the existing Home helper retained.
+
+These final-runtime conditions were verified. The complete procedure produced three consecutive successful boots with working root. Future Magisk upgrades require renewed validation of this device's container, loader and signing constraints.

@@ -6,7 +6,7 @@
 
 | Property | Tested value |
 |---|---|
-| Retail model | Fengmi / Formovie V10, M146FCN |
+| Market / model | **Chinese-market** Fengmi / Formovie V10, M146FCN |
 | Optical engine / platform | FMP6 / target1006 |
 | Hardware profile | ID 4, revision 5 |
 | Android | 9, API 28, VNDK 28 |
@@ -27,7 +27,7 @@ The tested `mali_kbase.ko` SHA-256 is:
 e064691a543a294fa196c8a1361e2f5ed1204373081df8a8ed71d14b703a3a68
 ```
 
-Treat the full profile as the compatibility condition. Re-derive addresses, structure layouts and loader behavior when any relevant component differs. The codename `nemo` also occurs on other Formovie products; retail model and firmware identity matter.
+This profile covers the Chinese model; the international V10 is outside the tested scope. Treat the full profile as the compatibility condition. Re-derive addresses, structure layouts and loader behavior when any relevant component differs. The codename `nemo` also occurs on other Formovie products; retail model and firmware identity matter.
 
 ## Establish network ADB and record state privately
 

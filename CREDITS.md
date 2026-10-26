@@ -4,6 +4,10 @@
 
 The V10-specific work combines existing research, public tools and direct analysis of the tested firmware. This source map identifies each upstream contribution; it does not imply that any upstream author tested or endorsed this V10 procedure.
 
+## Model-specific publication scope
+
+The first-known-publication statement is scoped to an end-to-end software-root procedure for the Chinese-market Fengmi V10 M146FCN on the listed firmware. No earlier guide for that exact target was identified in the public references checked. The international model is outside the tested scope. The underlying Mali, Linux, MStar, AVB and Magisk research remains credited to its original authors.
+
 ## Mali research and architectural precedent
 
 - **Man Yue Mo and GitHub Security Lab** — [GHSL-2022-054 Arm Mali advisory](https://securitylab.github.com/advisories/GHSL-2022-054_Arm_Mali/) and [the technical write-up](https://github.blog/2023-01-23-pwning-the-all-google-phone-with-a-non-google-bug/). These establish CVE-2022-38181 and its mitigation.

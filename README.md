@@ -1,8 +1,12 @@
-# Fengmi / Formovie V10: verified software root
+# Chinese-market Fengmi / Formovie V10: confirmed software root
 
-A prescriptive engineering guide to the software-only rooting method demonstrated on the **Fengmi V10 M146FCN, FengOS 2.1.5.3936**.
+A prescriptive engineering guide to the software-only rooting method demonstrated on the **Chinese-market Fengmi V10 M146FCN, FengOS 2.1.5.3936**.
 
-The verified result is **Magisk 30.7 root across two normal boots**, with SELinux **Enforcing** and Android reporting verified boot **green** and the bootloader **locked**. The work used network ADB and retained the stock projector software and device trees.
+**This guide applies to the Chinese model. It does not cover the international V10.**
+
+The verified result is **Magisk 30.7 root across three consecutive successful normal boots**, with SELinux **Enforcing** and Android reporting verified boot **green** and the bootloader **locked**. The work used network ADB and retained the stock projector software and device trees.
+
+To our knowledge, this is the **first publicly documented end-to-end software-root procedure for the Chinese-market V10 on this firmware**. This model-specific result builds on the upstream work credited below.
 
 The working chain is:
 
@@ -36,7 +40,7 @@ flowchart LR
 
 This is the documented procedure and compatibility profile. The purpose-built Rust helpers, private firmware images and signing material are not distributed in this repository. Recreating the method requires implementing the described guards and deriving the exact profile from the target firmware. A different device using the name `nemo` is a separate target.
 
-The runtime claim here is boot-persistent Magisk root. Complete validation of Magisk's later pre-init environment configuration is outside this edition's demonstrated runtime result. Firmware replacement, recovery entry and future Magisk updates are separate qualifications.
+Boot-persistent root and the completed Magisk pre-init environment are verified: the final configuration selects `userdata`, its pre-init block device matches that partition, and the official environment check returns 0. Firmware replacement, recovery entry and future Magisk updates are separate qualifications.
 
 ## Credits and publication scope
 
